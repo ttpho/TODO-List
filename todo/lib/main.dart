@@ -15,11 +15,11 @@ class StringCheckItem extends CheckItem {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'isChecked': isChecked,
-      'createDate': createDate,
-    };
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['title'] = this.title;
+    data['isChecked'] = this.isChecked;
+    data['createDate'] = this.createDate;
+    return data;
   }
 }
 
@@ -61,10 +61,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.resumed) {
-      _setListTodo(_list).then((isSaved) => print(isSaved));
-    }
+    _setListTodo(_list).then((isSaved) => print(isSaved));
   }
 
   @override
@@ -75,8 +72,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   static Future<bool> _setListTodo(final List<StringCheckItem> list) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String jsonStr = json.encode(list);
+    final String jsonStr =
+        json.encode(List<dynamic>.from(list.map((x) => x.toJson())));
     final String key = KeySharedPreferences.string_todo_list.toString();
+
     return prefs.setString(key, jsonStr);
   }
 
@@ -103,15 +102,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Widget _getBody() => _list.isEmpty
       ? Center(
-    child: Text(
-      "📌️",
-      style: TextStyle(fontSize: 56.0),
-    ),
-  )
+          child: Text(
+            "📌️",
+            style: TextStyle(fontSize: 56.0),
+          ),
+        )
       : BaseReorderableList(
-    listCheckItem: _list,
-    hasDismissible: true,
-  );
+          listCheckItem: _list,
+          hasDismissible: true,
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   _loadLocalList(final List<StringCheckItem> localList) {
     if (localList == null || localList.isEmpty) return;
     setState(() {
-      //_list.clear();
+      _list.clear();
       _list.addAll(localList);
     });
   }
